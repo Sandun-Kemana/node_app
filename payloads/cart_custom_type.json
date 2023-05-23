@@ -1,0 +1,23 @@
+curl --location 'https://api.australia-southeast1.gcp.commercetools.com/flybridge-dev-01/types' \
+--header 'Content-Type: application/json'
+--data '{
+  "key" : "cart-custom-type",
+  "name" : {
+    "en" : "cart custom types"
+  },
+  "description" : {
+    "en" : "Cart Properties"
+  },
+  "resourceTypeIds" : [ "cart" ],
+  "fieldDefinitions" : [ {
+    "name" : "sentToSellerPortal",
+    "label" : {
+      "en" : "sent_to_seller_portal"
+    },
+    "required" : false,
+    "type" : {
+      "name" : "Boolean"
+    },
+    "inputHint" : "SingleLine"
+  } ]
+}'
