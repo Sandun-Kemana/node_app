@@ -4,7 +4,7 @@ const { log } = require("../common/utils/logger");
 
 
 
-module.exports.pushOrderToSellerPortal = async (order) =>{
+const pushOrderToSellerPortal = async (order) =>{
   const response = await fetch('https://commercetools.kemanamagento.web.id/order/', {
         method: 'POST',
         body: order,
@@ -19,7 +19,9 @@ if (response && response.status !== 200) {
       log('Successfully sent order to seller portal.');
       status =  true;
   }
-  return status;
+  let updatedOrder = await setOrderSyncFlag(order,status);
+  log('updated order '+updatedOrder.body);
+  return updatedOrder;
 }
 
 module.exports.getOrderById = (ID) =>
@@ -29,14 +31,13 @@ module.exports.getOrderById = (ID) =>
     .get()
     .execute();
 
-module.exports.setOrderSyncFlag = async(orderId, status) => {
-    let order = await this.getOrderById(orderId);
-   order = await projectApiRoot
+const setOrderSyncFlag = async(order, status) => {
+  let syncedOrder = await projectApiRoot
       .orders()
-      .withId({ ID: order.body.id })
+      .withId({ ID: order.id })
       .post({
         body: {
-          version: order.body.version,
+          version: order.version,
           actions: [{
             action: "setCustomField",
             name: "sentToSellerPortal",
@@ -45,11 +46,11 @@ module.exports.setOrderSyncFlag = async(orderId, status) => {
         }
       })
       .execute();
-      log("Status updated for order "+order.body.id);
-      return order;
+      log("Status updated for order "+syncedOrder.id);
+      return syncedOrder;
     }
 
-module.exports.createOrderFromCart = async(cartId,version) =>
+const createOrderFromCart = async(cartId,version) =>
     projectApiRoot
       .orders()
       .post({
@@ -61,9 +62,9 @@ module.exports.createOrderFromCart = async(cartId,version) =>
       .execute();
 
 module.exports.placeCustomerOrder = async(cartId,version) => {
- let order =  await this.createOrderFromCart(cartId,version);
+ let order =  await createOrderFromCart(cartId,version);
  log("Order id "+order.body.id);
- let status = await this.pushOrderToSellerPortal(order.body);
- let updatedOrder = await this.setOrderSyncFlag(order.body.id,status);
+ let updatedOrder = await pushOrderToSellerPortal(order.body);
+ 
  return updatedOrder;
 }
