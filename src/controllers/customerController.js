@@ -33,4 +33,3 @@ exports.customers = async(req, res) => {
     res.status(400).send("Error sending customer to Seller Portal");
  }
 };
-   
